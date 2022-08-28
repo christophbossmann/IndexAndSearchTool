@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout charset="cp850">
+				<!-- <pattern>>%d{YYYY-MM-dd HH:mm:ss.SSS} [%t] %-5level - %msg%n</pattern> -->
+				<pattern>>%d{YYYY-MM-dd HH:mm:ss.SSS} %-5level - %msg%n</pattern>
+			</PatternLayout>
+        </Console>
+        <File name="File" fileName="logfile.log" append="false">
+            <PatternLayout charset="UTF-8">
+                <!-- <Pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%t] %-5level - %msg%n</Pattern> -->
+ 				<Pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} %-5level - %msg%n</Pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.lol.hello" level="info" additivity="true">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="File"/>
+			<AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
