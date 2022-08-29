@@ -24,4 +24,4 @@ The tool can be used for instance on an encrypted drive such as Cryptomator driv
 
 #### Search
  1. Edit `SEARCH-example_ask_query.bat` and adjust paths accordingly to fit path of index and other parameters.
- 2. Run `INDEX-example.bat` to start search process. The tool asks for a search query in advance so you can type in any string or lucene query you intend to search for.
+ 2. Run `SEARCH-example.bat` to start search process. The tool asks for a search query in advance so you can type in any string or lucene query you intend to search for.
