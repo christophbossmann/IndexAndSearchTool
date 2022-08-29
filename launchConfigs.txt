@@ -1,0 +1,2 @@
+--mode search --indexpath C:\Users\Christoph\Documents\lucenetest\index --outpath C:\Users\Christoph\Documents\lucenetest\output --numberofresults 50 --inputcharset UTF-8 --outputcharset UTF-8
+--mode index --indexpath C:\Users\Christoph\Documents\lucenetest\index --docspath C:\Users\Christoph\Documents\lucenetest\input --outpath C:\Users\Christoph\Documents\lucenetest\output ----inputcharset UTF-8 --outputcharset UTF-8

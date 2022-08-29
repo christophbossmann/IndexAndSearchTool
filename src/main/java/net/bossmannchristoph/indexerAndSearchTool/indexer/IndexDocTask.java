@@ -40,7 +40,7 @@ public class IndexDocTask implements Runnable {
 
 	public static final Logger LOGGER = LogManager.getLogger(IndexDocTask.class.getName());
 
-	long lastModified;
+	private long lastModified;
 
 	private IndexDocTask(Collection<String> indexedFileTypes, PrintStream out, Tika tika, Map<String, Long> fileMap,
 			IndexWriter writer) {

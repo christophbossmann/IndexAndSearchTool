@@ -1,3 +1,3 @@
 @ECHO OFF
-java -jar target\IndexerAndSearchTool-0.0.1-SNAPSHOT-jar-with-dependencies.jar --mode search --indexpath %cd%/documents/index --outpath %cd% --numberofresults 50 --query "tüv"
+java -Dlog4j.configurationFile=log4j2_windows.xml -jar target\IndexerAndSearchTool-0.0.1-SNAPSHOT-jar-with-dependencies.jar --mode search --indexpath %cd%/documents/index --outpath %cd%/documents/output --numberofresults 50 --query "tüv"
 PAUSE

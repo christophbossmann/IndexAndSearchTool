@@ -2,7 +2,7 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout charset="UTF-8">
+            <PatternLayout charset="cp850">
 				<!-- <pattern>>%d{YYYY-MM-dd HH:mm:ss.SSS} [%t] %-5level - %msg%n</pattern> -->
 				<pattern>>%d{YYYY-MM-dd HH:mm:ss.SSS} %-5level - %msg%n</pattern>
 			</PatternLayout>

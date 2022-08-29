@@ -260,7 +260,7 @@ public class LuceneIndexerWithTika {
 		String typeString = "";
 		switch(type) {
 			case MESSAGE_CREATED:
-				typeString = "CREATED -> INDEXING:";
+				typeString = "CREATED -> INDEXING";
 				break;
 			case MESSAGE_MODIFIED:
 				typeString = "UPDATED -> RE-INDEXING";
