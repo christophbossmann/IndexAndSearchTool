@@ -17,13 +17,14 @@ import net.bossmannchristoph.indexerAndSearchTool.TechnicalException;
 
 public class SearcherConsoleInterfaceHandler implements IConsoleHandler {
 
+
 	public static Logger LOGGER = LogManager.getLogger(SearcherConsoleInterfaceHandler.class.getName());
 	
 	public static final String QUERY = "query";
 	public static final String NUMBER_OF_RESULTS = "numberofresults";
 	public static final String INDEXPATH = "indexpath";
 	public static final String OUTPATH = "outpath";
-	
+	public static final String SEARCHPATH = "searchpath";
 	public static final String MODE_SEARCH = "search";
 	
 	private LuceneSearcher luceneSearcher;
@@ -38,9 +39,9 @@ public class SearcherConsoleInterfaceHandler implements IConsoleHandler {
 	public void execute(Map<String, String> args) {
 		try {
 			askForParams(args);
-	    	luceneSearcher.prepareOutput(args.get(OUTPATH), args.getOrDefault(ConsoleInterfaceHandler.OUTPUT_CHARSET, "UTF-8"));
+	    	luceneSearcher.prepareOutput(args.get(OUTPATH));
 	    	luceneSearcher.init(args.get(INDEXPATH));
-	    	SearchResults searchResults = luceneSearcher.search(args.get(QUERY), Integer.valueOf(args.get(NUMBER_OF_RESULTS)));
+	    	SearchResults searchResults = luceneSearcher.search(args.get(QUERY), args.get(SEARCHPATH), Integer.valueOf(args.get(NUMBER_OF_RESULTS)));
 	    	luceneSearcher.prettyPrint(searchResults);
 		}
 		catch(IOException | NumberFormatException | ParseException e) {
@@ -56,7 +57,13 @@ public class SearcherConsoleInterfaceHandler implements IConsoleHandler {
 			String param = sc.nextLine();
 			args.put(QUERY, param);
 			askedParams.add(QUERY + ": " + param);
-		}		
+		}
+		if(args.get(SEARCHPATH) == null) {
+			System.out.println("Enter search path (or leave empty): ");
+			String param = sc.nextLine();
+			args.put(SEARCHPATH, param);
+			askedParams.add(SEARCHPATH + ": " + param);
+		}
 		if(args.get(NUMBER_OF_RESULTS) == null) {			
 			System.out.println("Enter number of results: ");
 			String param = sc.nextLine();
@@ -70,7 +77,7 @@ public class SearcherConsoleInterfaceHandler implements IConsoleHandler {
 			askedParams.add(INDEXPATH + ": " + param);
 		}
 		if(args.get(OUTPATH) == null) {
-			System.out.println("Enter out path: ");
+			System.out.println("Enter out path (or leave empty): ");
 			String param = sc.nextLine();
 			args.put(OUTPATH, param);
 			askedParams.add(OUTPATH + ": " + param);
@@ -89,15 +96,18 @@ public class SearcherConsoleInterfaceHandler implements IConsoleHandler {
 				.desc("mode of application, either search or index").build();
         Option queryOpt = Option.builder("q").longOpt("query").argName("query").hasArg().required(false)
 				.desc("path of docs to be indexed").build();
+		Option searchpathOpt = Option.builder("sp").longOpt("searchpath").argName("searchpath").hasArg().required(false)
+				.desc("path of docs to be indexed").build();
         Option indOpt = Option.builder("ind").longOpt("indexpath").argName("indexpath").hasArg().required(false)
 				.desc("path where index of indexed docs shall be stored").build();
         Option outOpt = Option.builder("out").longOpt("outpath").argName("outpath").hasArg().required(false)
 				.desc("path where the result of the index process shall be stored").build();
         queryOpt.setRequired(false);
+		searchpathOpt.setRequired(false);
         indOpt.setRequired(false);
         outOpt.setRequired(false);
         numberOfResultsOpt.setRequired(false);
-		return new Option[] {queryOpt, indOpt, outOpt, numberOfResultsOpt};
+		return new Option[] {queryOpt, searchpathOpt, indOpt, outOpt, numberOfResultsOpt};
 	}
 
 	@Override

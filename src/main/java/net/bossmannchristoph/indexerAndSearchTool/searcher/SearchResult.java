@@ -3,7 +3,7 @@ package net.bossmannchristoph.indexerAndSearchTool.searcher;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;
 
-import net.bossmannchristoph.indexerAndSearchTool.TwinWriter;
+import java.io.PrintStream;
 
 public class SearchResult {
 	public SearchResult(ScoreDoc doc, Document d) {
@@ -27,7 +27,7 @@ public class SearchResult {
 		this.document = document;
 	}
 	
-	public void prettyPrint(TwinWriter ps) {
+	public void prettyPrint(PrintStream ps) {
 		ps.print(document.get("path") + ", score: " + scoreDoc.score);
 	}
 	

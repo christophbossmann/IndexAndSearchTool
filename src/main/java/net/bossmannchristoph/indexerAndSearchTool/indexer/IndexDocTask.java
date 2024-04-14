@@ -5,19 +5,17 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongPoint;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
@@ -34,9 +32,9 @@ public class IndexDocTask implements Runnable {
 	public Tika tika;
 	public Map<String, Long> fileMap;
 	public IndexWriter writer;
-	public List<String> existingFiles;
 
 	public Path file;
+	public String indexedFileString;
 
 	public static final Logger LOGGER = LogManager.getLogger(IndexDocTask.class.getName());
 
@@ -56,9 +54,10 @@ public class IndexDocTask implements Runnable {
 		return new IndexDocTask(indexedFileTypes, out, tika, fileMap, writer);
 	}
 
-	public void init(Path file, long lastModified) {
+	public void init(Path file, long lastModified, String indexedFileString) {
 		this.file = file;
 		this.lastModified = lastModified;
+		this.indexedFileString = indexedFileString;
 	}
 
 	@Override
@@ -75,16 +74,16 @@ public class IndexDocTask implements Runnable {
 	}
 
 	private void indexDoc() throws IOException, TikaException {
-		
-		Long lastModifiedInIndex = fileMap.get(file.toString());
+		Long lastModifiedInIndex = fileMap.get(indexedFileString);
 		if (lastModifiedInIndex != null && lastModifiedInIndex >= lastModified) {
-			LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_NOT_CHANGED, file.toString(), out);
+			LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_NOT_CHANGED, indexedFileString, out);
 			return;
 		}
-		if (!indexedFileTypes.contains(FilenameUtils.getExtension(file.toString()))) {
-			LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_IGNORED_FILETYPE, file.toString(), out);
+		if (!indexedFileTypes.contains(FilenameUtils.getExtension(indexedFileString))) {
+			LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_IGNORED_FILETYPE, indexedFileString, out);
 			return;
 		}
+
 		InputStream stream = Files.newInputStream(file);
 
 		// Create lucene Document
@@ -96,22 +95,34 @@ public class IndexDocTask implements Runnable {
 			// document. The delete and then add are atomic as seen
 			// by a reader on the same index
 
-			Long previousValue = fileMap.put(file.toString(), lastModified);
+			Long previousValue = fileMap.put(indexedFileString, lastModified);
 			if (previousValue == null) {
-				LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_CREATED, file.toString(), out);
+				LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_CREATED, indexedFileString, out);
 			} else {
-				LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_MODIFIED, file.toString(), out);
+				LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_MODIFIED, indexedFileString, out);
 			}
-
+			int availableBefore = stream.available();
 			String extractedContent = tika.parseToString(stream);
-			doc.add(new StringField("path", file.toString(), Field.Store.YES));
+			LOGGER.debug("File path: " + file.toString() +
+					"\nStream (before) available: " + availableBefore +
+					"\nExtracted Content (bytes): " + extractedContent.getBytes().length);
+			stream.close();
+			doc.add(new StringField("path", indexedFileString, Field.Store.YES));
 			doc.add(new LongPoint("modified", lastModified));
+			doc.add(new StoredField("modified", lastModified));
 			doc.add(new TextField("contents", extractedContent, Store.YES));
 
-			writer.updateDocument(new Term("path", file.toString()), doc);
+			AtomicInteger index = new AtomicInteger(-1);
+			Paths.get(indexedFileString).forEach(e -> {
+						int nrPathElement = index.incrementAndGet();
+						doc.add(new StringField("path_" + nrPathElement, e.toString(), Field.Store.YES));
+					}
+			);
+
+			writer.updateDocument(new Term("path", indexedFileString), doc);
 
 		} catch (ZeroByteFileException e) {
-			LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_EMPTY_FILE_IGNORED, file.toString(), out);
+			LuceneIndexerWithTika.printIndexTypeMessage(LuceneIndexerWithTika.MESSAGE_EMPTY_FILE_IGNORED, indexedFileString, out);
 		}
 	}
 

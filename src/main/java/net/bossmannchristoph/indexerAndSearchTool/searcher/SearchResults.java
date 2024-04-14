@@ -1,9 +1,8 @@
 package net.bossmannchristoph.indexerAndSearchTool.searcher;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import net.bossmannchristoph.indexerAndSearchTool.TwinWriter;
 
 public class SearchResults {
 
@@ -11,6 +10,7 @@ public class SearchResults {
 		searchResults = new ArrayList<>();
 	}
 	private List<SearchResult> searchResults;
+	private String usedQuery;
 	private int totalResults;
 	
 	public List<SearchResult> getSearchResults() {
@@ -26,15 +26,23 @@ public class SearchResults {
 		this.totalResults = totalResults;
 	}
 	
-	public void prettyPrint(TwinWriter tw) {
-		tw.println("Total results :: " + totalResults);
+	public void prettyPrint(PrintStream ps) {
+		ps.println("Used query :: " + usedQuery);
+		ps.println("Total results :: " + totalResults);
 		int i = 0;
 		for(SearchResult searchResult : searchResults) {
 			++i;
-			tw.print(i + ": ");
-			searchResult.prettyPrint(tw);
-			tw.print("\n");
+			ps.print(i + ": ");
+			searchResult.prettyPrint(ps);
+			ps.print("\n");
 		}
 	}
-	
+
+	public String getUsedQuery() {
+		return usedQuery;
+	}
+
+	public void setUsedQuery(String usedQuery) {
+		this.usedQuery = usedQuery;
+	}
 }

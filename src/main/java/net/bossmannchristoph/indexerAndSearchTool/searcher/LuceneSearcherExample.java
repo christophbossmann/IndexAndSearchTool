@@ -14,17 +14,22 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+/*
+USE LUCENE SEARCHER INSTEAD!!!
+ */
+@Deprecated
+
 public class LuceneSearcherExample {
 
 	// directory contains the lucene indexes
-	private static final String INDEX_DIR = "C:\\Users\\Christoph\\Documents\\lucenetest\\index";
+	private static final String INDEX_DIR = "C:\\Users\\chris\\dev\\IndexAndSearchTool\\documents\\index";
 
 	public static void main(String[] args) throws Exception {
 		// Create lucene searcher. It search over a single IndexReader.
 		IndexSearcher searcher = createSearcher();
 
 		// Search indexed contents using search term
-		TopDocs foundDocs = searchInContent("Opferrolle", searcher, 50);
+		TopDocs foundDocs = searchInContent("minister", searcher, 50);
 
 		// Total found documents
 		System.out.println("Total Results :: " + foundDocs.totalHits);

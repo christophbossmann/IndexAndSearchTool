@@ -34,7 +34,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import net.bossmannchristoph.indexerAndSearchTool.Utilities;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.output.NullPrintStream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,12 +67,8 @@ public class LuceneIndexerWithTika {
 	public static final int MESSAGE_IGNORED_FILETYPE = 5;
 	public static final int MESSAGE_DELETED_IGNORED_FILETYPE = 6;
 	public static final int MESSAGE_DELETED_USER = 7;
-
 	private static final Logger LOGGER = LogManager.getLogger(LuceneIndexerWithTika.class.getName());
-
 	public static final Level INFO = Level.INFO;
-	public static final Level DEFAULT_LEVEL = INFO;
-
 	private Collection<String> indexedFileTypes;
 	private Tika tika;
 	private Path docDir;
@@ -89,11 +87,11 @@ public class LuceneIndexerWithTika {
 
 	public static void main(String[] args) {
 		// Input folder
-		String docsPath = "C:\\Users\\Christoph\\Documents\\lucenetest\\input";
+		String docsPath = "C:\\Users\\chris\\dev\\IndexAndSearchTool\\documents\\input";
 		// Output folder
-		String indexPath = "C:\\Users\\Christoph\\Documents\\lucenetest\\index";
+		String indexPath = "C:\\Users\\chris\\dev\\IndexAndSearchTool\\documents\\index";
 		// Output folder
-		String outputPath = "C:\\Users\\Christoph\\Documents\\lucenetest\\output";
+		String outputPath = "C:\\Users\\chris\\dev\\IndexAndSearchTool\\documents\\output";
 
 		String types = IndexerConsoleInterfaceHandler.defaultIndexFileTypes;
 
@@ -117,11 +115,15 @@ public class LuceneIndexerWithTika {
 	}
 
 	public void prepareOutputAndLogging(String outputPath) throws IOException {
+		if(outputPath == null || outputPath.isEmpty()) {
+			LOGGER.warn("No OutputPath provided, output to file is disabled!!");
+			fileOutputPrintStream = new NullPrintStream();
+			return;
+		}
 		String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
 		File resultOutFile = Paths.get(outputPath, "indexer_" + timeStamp + ".out").toFile();
 		resultOutFile.getParentFile().mkdirs();
 		resultOutFile.createNewFile();
-		//out = Utilities.getFileAndConsoleTwinWriter(resultOutFile, Charset.forName("UTF-8"));
 		 fileOutputPrintStream = new PrintStream(new FileOutputStream(resultOutFile), true, Charset.forName("UTF-8"));
 	}
 
@@ -241,19 +243,22 @@ public class LuceneIndexerWithTika {
 	}
 
 	private void indexDoc(Path file, long lastModified) {
-		IndexDocTask t = IndexDocTask.getTaskInstance(indexedFileTypes, fileOutputPrintStream, tika, fileMap, writer);
-		t.init(file, lastModified);
+		String indexedFileString = Utilities.getDocPath(docDir, file.toFile()).toString().toLowerCase();
+		IndexDocTask t = IndexDocTask.getTaskInstance(indexedFileTypes, fileOutputPrintStream, tika, fileMap,
+				writer);
+		t.init(file, lastModified, indexedFileString);
 		Future<?> future = executor.submit(t);
 		try {
 			future.get(25, TimeUnit.SECONDS);
 		} catch (TimeoutException te) {
 			future.cancel(true);
-			printIndexTypeMessage(MESSAGE_TIME_LIMIT_REACHED, file.toString(), fileOutputPrintStream);
+			printIndexTypeMessage(MESSAGE_TIME_LIMIT_REACHED, indexedFileString,
+					fileOutputPrintStream);
 		}
 		catch(ExecutionException | InterruptedException e) {
 			throw new TechnicalException(e);
 		}
-		existingFiles.add(file.toString());
+		existingFiles.add(indexedFileString);
 	}
 	
 	public static void printIndexTypeMessage(int type, String file, PrintStream out) {
@@ -300,7 +305,7 @@ public class LuceneIndexerWithTika {
 				.collect(Collectors.toMap(v -> v, v -> DELETE_DUE_TO_USER));
 
 		for (String file : existingFiles) {
-			String fileExtension = FilenameUtils.getExtension(file.toString());
+			String fileExtension = FilenameUtils.getExtension(file);
 			if (!indexedFileTypes.contains(fileExtension)) {
 				toBeDeleted.replace(file, DELETE_DUE_TO_FILETYPE);
 			} else {

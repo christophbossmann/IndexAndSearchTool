@@ -25,3 +25,8 @@ The tool can be used for instance on an encrypted drive such as Cryptomator driv
 #### Search
  1. Edit `SEARCH-example_ask_query.bat` and adjust paths accordingly to fit path of index and other parameters.
  2. Run `SEARCH-example.bat` to start search process. The tool asks for a search query in advance so you can type in any string or lucene query you intend to search for.
+ 
+## Sample Data Collections:
+
+Find sample pdf data collection here: https://www.loc.gov/item/2020445568/
+Find sample txt data collection here: https://www.kaggle.com/datasets/jensenbaxter/10dataset-text-document-classification

@@ -28,10 +28,10 @@ public class LuceneIndexerExample {
 	public static void main(String[] args)
 	  {
 	    //Input folder
-	    String docsPath = "C:\\Users\\Christoph\\Documents\\lucenetest\\input";
+	    String docsPath = "C:\\Users\\chris\\dev\\IndexAndSearchTool\\documents\\input";
 	     
 	    //Output folder
-	    String indexPath = "C:\\Users\\Christoph\\Documents\\lucenetest\\index";
+	    String indexPath = "C:\\Users\\chris\\dev\\IndexAndSearchTool\\documents\\index";
 	 
 	    //Input Path Variable
 	    final Path docDir = Paths.get(docsPath);

@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.nio.file.Path;
 
 import org.apache.commons.io.output.TeeOutputStream;
 
@@ -19,23 +19,8 @@ public class Utilities {
 	    System.out.println("System encoding: " + System.getProperty("file.encoding"));
 	    return out;
 	}
-	
-	public static TwinWriter getFileAndConsoleTwinWriter(File f, Charset charset) throws FileNotFoundException {
-		FileOutputStream fileOutputStream = new FileOutputStream(f);
-		TwinWriter tw = new TwinWriter(System.out, new PrintStream(fileOutputStream, true, charset));
-		return tw;
-	}	
-	
-	public static void printFileNames() {
-		File folder = new File(System.getProperty("user.dir"));
-		File[] listOfFiles = folder.listFiles();
 
-		for (int i = 0; i < listOfFiles.length; i++) {
-		  if (listOfFiles[i].isFile()) {
-		    System.out.println("File " + listOfFiles[i].getName());
-		  } else if (listOfFiles[i].isDirectory()) {
-		    System.out.println("Directory " + listOfFiles[i].getName());
-		  }
-		}
+	public static Path getDocPath(Path rootPath, File f) {
+		return rootPath.relativize(f.toPath());
 	}
 }

@@ -71,7 +71,7 @@ public class IndexerConsoleInterfaceHandler implements IConsoleHandler {
 			args.put(INDEXPATH, param);	
 		}
 		if(args.get(OUTPATH) == null) {
-			System.out.println("Enter out path: ");
+			System.out.println("Enter out path (or leave empty): ");
 			String param = sc.nextLine();
 			args.put(OUTPATH, param);		
 		}
